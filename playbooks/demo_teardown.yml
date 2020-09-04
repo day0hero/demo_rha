@@ -1,0 +1,41 @@
+#!/usr/local/bin/ansible-playbook -vv
+- name: AWS | Delete ec2 resources
+  hosts: localhost
+  become: false
+  connection: local
+  gather_facts: false
+  vars:
+    demo_name: rha_demo
+  tasks:
+    - name: AWS | Collect VPC Information
+      block:
+        - name: aws_import | Collect VPC Information | VPC_ID
+          ec2_vpc_net_info:
+            filters:
+              "tag:Name": "DEFAULT"
+          register: clustervpc
+        - set_fact:
+            vpc_id: "{{ clustervpc.vpcs[0].id }}"
+        
+        - name: AWS | Collect security group information
+          ec2_group_info:
+            filters:
+              vpc-id: "{{ vpc_id }}"
+              group-name: "{{ demo_name }}-securityGroup"
+          register: securitygroup
+
+    - debug:
+        msg: "{{ securitygroup.security_groups[0].group_id }}"
+
+    - name: AWS | Delete demo ec2
+      ec2_instance:
+        filters:
+          instance-state-name: running
+          "tag:Name": "{{ demo_name }}-webserver"
+        state: absent
+
+    - name: AWS | Delete ec2 security group
+      ec2_group:
+        group_id: "{{ securitygroup.security_groups[0].group_id }}"
+        vpc_id: "{{ vpc_id }}"
+        state: absent

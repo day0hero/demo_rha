@@ -1,0 +1,41 @@
+#!/usr/local/bin/ansible-playbook
+- name: Apache | Install and Configure Apache
+  hosts: web
+  become: true
+  vars:
+    packages:
+      - httpd
+      - firewalld
+  tasks:
+    - name: "Apache | Install the {{ packages }} packages"
+      yum:
+        name: "{{ packages }}"
+        state: installed
+
+    - name: Apache | Create generic welcome webpage
+      copy:
+        dest: /var/www/html/index.html
+        content: "hope you enjoy the demo!"
+        owner: root
+        group: root
+        setype: httpd_sys_content_t
+      register: httpd_config
+
+    - name: "Apache | Start and enable the {{ packages }} services"
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop: "{{ packages }}"
+
+    - name: Apache | Configure the firewall for web traffic
+      firewalld:
+        port: 80/tcp
+        permanent: true
+        state: enabled
+        immediate: true
+
+    - name: Apache | Verify the site is up
+      uri:
+        url: "http://{{inventory_hostname }}"
+        return_content: yes

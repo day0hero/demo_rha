@@ -1,0 +1,3 @@
+- name: demo_web | Full Apache Deployment | Install and Configure Apache
+  import_tasks: apache_install_configure.yml
+  tags: configure

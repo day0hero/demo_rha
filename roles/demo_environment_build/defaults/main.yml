@@ -1,0 +1,11 @@
+demo_name: rha_demo
+packages:
+  - httpd
+  - firewalld
+  - vim
+services:
+  - firewalld
+  - httpd
+ports:
+  - 80/tcp
+

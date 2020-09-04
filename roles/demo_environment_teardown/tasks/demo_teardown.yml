@@ -1,0 +1,34 @@
+- name: rha_demo | demo_teardown | collect VPC information
+  block:
+    - name: rha_demo | Collect VPC Information | VPC_ID
+      ec2_vpc_net_info:
+        filters:
+          "tag:Name": "DEFAULT"
+      register: clustervpc
+    - set_fact:
+        vpc_id: "{{ clustervpc.vpcs[0].id }}"
+    
+    - name: rha_demo | demo_teardown | collect security group information
+      ec2_group_info:
+        filters:
+          vpc-id: "{{ vpc_id }}"
+          group-name: "{{ demo_name }}-securityGroup"
+      register: securitygroup
+
+- name: rha_demo | demo_teardown | delete demo ec2
+  ec2_instance:
+    filters:
+      instance-state-name: running
+      "tag:Name": "{{ demo_name }}-webserver"
+    state: absent
+
+- name: rha_demo | demo_teardown | delete ec2 security group
+  ec2_group:
+    group_id: "{{ securitygroup.security_groups[0].group_id }}"
+    vpc_id: "{{ vpc_id }}"
+    state: absent
+
+- name: rha_demo | demo_teardown | remove static inventory
+  file:
+    path: /tmp/inventory
+    state: absent

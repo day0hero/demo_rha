@@ -1,0 +1,64 @@
+- name: AWS | Collect VPC Information
+  block:
+    - name: aws_import | Collect VPC Information | VPC_ID
+      ec2_vpc_net_info:
+        filters:
+          "tag:Name": "DEFAULT"
+      register: clustervpc
+    - set_fact:
+        vpc_id: "{{ clustervpc.vpcs[0].id }}"
+
+- name: AWS | Find the AMI for the latest RHEL8 image
+  ec2_ami_info:
+    filters:
+      name: "RHEL-8.1.0_HVM-*"
+  register: ami
+
+- name: AWS | Define AMI fact
+  set_fact:
+    ami_id: "{{ ami.images[0].image_id }}"
+
+- name: AWS | Create ec2 security group
+  ec2_group:
+    name: "{{ demo_name }}-securityGroup"
+    description: "{{ demo_name }} Security Group"
+    vpc_id: "{{ vpc_id }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+    rules_egress:
+      - proto: -1
+        cidr_ip: 0.0.0.0/0
+  register: bastion_sg
+ 
+- name: AWS | Create ec2 in VPC
+  ec2_instance:
+    name: "{{ demo_name }}-webserver"
+    key_name: "{{ demo_name }}"
+    security_group: "{{ demo_name }}-securityGroup"
+    image_id:  "{{ ami.images[0].image_id }}"
+    instance_type: t2.micro
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          delete_on_termination: true
+          volume_size: 25
+    tags:
+      Name: "{{ demo_name }}-webserver"
+    network:
+      assign_public_ip: true
+  register: ec2
+
+- set_fact:
+    demo_public_ip: "{{ ec2.instances[0].public_ip_address }}" 
+
+- name: rha_demo | build_demo | create static inventory
+  template:
+    src: inventory.j2
+    dest: /tmp/inventory

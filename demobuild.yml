@@ -1,0 +1,16 @@
+- name: demo | Build demo environment
+  hosts: localhost
+  roles:
+    - role: demo_environment_build
+
+- name: demo | refresh inventory
+  hosts: localhost
+  tasks:
+   - name: demo | refresh
+     meta: refresh_inventory
+
+- name: demo | Apache installation and configure
+  hosts: web
+  become: true
+  roles:
+    - role: demo_www

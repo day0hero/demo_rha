@@ -1,0 +1,6 @@
+- name: demo | Apache environment teardown
+  hosts: localhost
+  roles:
+    - role: demo_environment_teardown
+      tags: 
+      - destroy

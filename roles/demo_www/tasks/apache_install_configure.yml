@@ -1,0 +1,37 @@
+---
+- name: "Apache | Install the {{ packages }} packages"
+  become: true
+  yum:
+    name: "{{ packages }}"
+    state: installed
+
+- name: Apache | Create generic welcome webpage
+  become: true
+  copy:
+    dest: /var/www/html/index.html
+    content: "hope you enjoy the demo!"
+    owner: root
+    group: root
+    setype: httpd_sys_content_t
+  register: httpd_config
+
+- name: rha_demo | apache_install_configure | start and enable services
+  become: true
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ services }}"
+
+- name: rha_demo | apache_install_configure | configure the firewall for web traffic
+  become: true
+  firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: rha_demo | apache_install_configure | curl the public_ip address
+  uri:
+    url: "http://{{ inventory_hostname }}"
+  register: www

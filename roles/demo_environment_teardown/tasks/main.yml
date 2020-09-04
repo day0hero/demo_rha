@@ -1,0 +1,2 @@
+- name: rha_demo | demo environment teardown
+  import_tasks: demo_teardown.yml
