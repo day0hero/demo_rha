@@ -39,8 +39,9 @@ An example credentials file looks like:
 [default]
 aws_access_key_id = XXXXXXXXXXXXXX
 aws_secret_access_key = 123456XXXXXXXXX
+region = us-gov-west-1
 ```
 
 Authors: 
-  jonny@redhat.com
-  mholmes@redhat.com
+  -jonny@redhat.com
+  -mholmes@redhat.com
