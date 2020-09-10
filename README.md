@@ -43,5 +43,5 @@ region = us-gov-west-1
 ```
 
 Authors: 
-  -jonny@redhat.com
-  -mholmes@redhat.com
+  - jonny@redhat.com
+  - mholmes@redhat.com
