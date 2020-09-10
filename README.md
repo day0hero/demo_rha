@@ -24,11 +24,22 @@ so you may have to change the path depending on your systems.
 The `ansible.cfg` has a few parameters uncommented:
 `inventory` - The inventory path is defined as `/tmp/inventory`
 `remote_user`  is defined as `ec2-user`
-`private_key_file` is defined as `~/.ssh/demo.pem`
+`private_key_file` is defined as `~/.ssh/rha_demo.pem`
 `host_key_checking` is set to `false`
 
 ## Assumptions:
 Ansible 2.9.10 is installed.
+
+*Credentials*
+In order to run these roles you will need to have an IAM ID and Key for AWS stored
+in `~/.aws/credentials` or exported as environment variables
+
+An example credentials file looks like:
+```
+[default]
+aws_access_key_id = XXXXXXXXXXXXXX
+aws_secret_access_key = 123456XXXXXXXXX
+```
 
 Authors: 
   jonny@redhat.com
